@@ -1,0 +1,155 @@
+#!/bin/bash
+
+MAC_SIGNING_IDENTITY="Developer ID Application:"
+entitlements="wine32on64.entitlements"
+app="$1"
+product_id=
+bundle_id=
+SRCROOT=.
+
+if [ ! -f $entitlements ]
+then
+	echo "$entitlements not found. Make sure it's in your working directory."
+        exit 1
+fi
+
+if [ -z "$app" ]
+then
+	echo "You must specify the absolute path to the .app"
+        exit 1
+fi
+
+if [ ! -d "$app" ]
+then
+	echo "The path You specify is invalid. Please provide the absolute path to the .app"
+        exit 1
+fi
+
+if [[ ! "$app" = /* ]]
+then
+	echo "The path you specified is not an absolute path. Please provide the absolue path to the .app"
+        exit 1
+fi
+
+if [ -z "$bundle_id" ]
+then
+    bundle_id=`defaults read "$app/Contents/Info.plist" CFBundleIdentifier`
+    if [ -z "$bundle_id" ]
+    then
+        echo "Could not determine the product name from '$app'. Did you provide the absolute path to the .app?"
+        exit 1
+    fi
+fi
+echo "Bundle ID = \"$bundle_id\""
+
+if [ -z "$product_id" ]
+then
+    product_id=`ls -d "$app/Contents/SharedSupport"/* | grep -v '/X11'`
+    if [ ! -d "$product_id" ]
+    then
+        echo "could not determine the product id from '$app'"
+        exit 1
+    fi
+    product_id=`basename "$product_id"`
+    echo "$product_id" | LC_ALL=C egrep '^[a-zA-Z0-9_][a-zA-Z0-9_][a-zA-Z0-9_][a-zA-Z0-9_][a-zA-Z0-9_]*$' >/dev/null
+    if [ $? -ne 0 ]
+    then
+        echo "the product id '$product_id' is not valid"
+        exit 1
+    fi
+fi
+echo "Product ID   = \"$product_id\""
+
+keychain=$(security find-certificate -c "$MAC_SIGNING_IDENTITY" | grep keychain | awk 'gsub(/"/, "", $2) {print $2}')
+locked=$(security show-keychain-info "$keychain" 2>&1 | grep "timeout")
+if [ -z "$locked" ]
+then
+        echo "Failed to find unlocked keychain with required certificate. Is your certificate in an unlocked keychain in your keychain search path?"
+        echo "Your keychain search path is:"
+	security list-keychain
+        exit 1
+fi
+
+if [ "$MAC_SIGNING_IDENTITY" != "-" ] ; then
+    # Figure out the Organizational Unit (OU) from the signing identity
+    ou=$(
+        set -x
+        security find-certificate -p -c "$MAC_SIGNING_IDENTITY" | \
+            openssl x509 -inform PEM -subject -noout -nameopt sname,sep_multiline,space_eq | \
+            awk '/ OU = / {print $3}'
+    )
+
+    if [ -z "$ou" ]; then
+        echo "error: Could not determine OU from signing identity '$MAC_SIGNING_IDENTITY'"
+        exit 1
+    fi
+fi
+
+set -e
+
+# Sign the app.  The designated requirements were obtained by watching what Xcode 4.3
+# does when it signs for Developer ID.
+function sign_one()
+{
+    file="$1"; shift
+    identifier="$1"; shift
+    if [ "$MAC_SIGNING_IDENTITY" = "-" ] ; then
+        codesign --sign "$MAC_SIGNING_IDENTITY" \
+            --force \
+            "$file" "$@"
+    else
+        codesign --sign "$MAC_SIGNING_IDENTITY" \
+            --force \
+            --requirements "=designated => anchor apple generic and identifier \"$identifier\" \
+               and ((cert leaf[field.1.2.840.113635.100.6.1.9] exists) or \
+                    (certificate 1[field.1.2.840.113635.100.6.2.6] exists and \
+                      certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"$ou\" \
+                    ))" \
+            "$file" "$@"
+    fi
+}
+
+function sign_subdir()
+{
+  subdir="$1" ; shift
+  id_component="$1" ; shift
+	
+  find "$subdir/" -type f \( -name "*.so" -o -name "*dylib" -o -exec sh -c 'file "$0" | fgrep -qsw Mach-O' {} \; \) -print0 |
+    while IFS= read -r -d '' file ; do
+      name=$(basename "$file")
+      name="${name//[^-a-zA-Z0-9]/-}"
+      if [ -z "${name/#[^a-zA-Z]*}" ] ; then
+        name="a-$name"
+      fi
+      if [ -z "${name/%*[^a-zA-Z0-9]}" ] ; then
+        name="$name-0"
+      fi
+      identifier="$bundle_id.$id_component.$name"
+      sign_one "$file" "$identifier" --identifier "$identifier" "$@"
+    done
+}
+
+set -x
+
+# Sign Sparkle framework and pyobjc bundle separately from the app bundle
+if [ -d "$app/Contents/Frameworks/Sparkle.framework" ]; then
+  sign_one "$app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/finish_installation.app" "org.andymatuschak.sparkle.finish-installation" --options runtime
+  sign_one "$app/Contents/Frameworks/Sparkle.framework" "org.andymatuschak.Sparkle"
+fi
+
+sign_subdir "$app/Contents/SharedSupport/$product_id/bin" "bin" --options runtime
+
+for libdir in "$app/Contents/SharedSupport/$product_id"/lib* ; do
+  sign_subdir "$libdir" "$(basename "$libdir")"
+done
+
+# The wine (pre)loaders were already signed with the bin directory, above, but
+# we need to re-do it with entitlements
+
+for i in "$app/Contents/SharedSupport/$product_id/bin"/wine*loader*; do
+	sign_one "$i" "$bundle_id.wineloader" \
+		--options runtime \
+		--entitlements "$SRCROOT/wine32on64.entitlements"
+done
+
+sign_one "$app" "$bundle_id" --options runtime --entitlements "$SRCROOT/wine32on64.entitlements"

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# read config
+echo "Reading myappleid.config"
+. ./myappleid.config
+if [ -z "$appleid" ]
+then
+        echo "Error: Please add an entry 'appleid=<your_appleid_here>' to myappleid.config"
+        exit 1
+fi
+if [ -z "$aspw" ]
+then
+        echo "Error: Please add an entry 'aspw=<your_app_specific_password_here>' to myappleid.config"
+        exit 1
+fi
+echo "Notarisation will use apple id '$appleid'"
+
+# unzip archive to EasyCash&Tax.app folder
+echo "Unzipping original package..."
+rm -rf EasyCash\&Tax.app
+unzip -q easyct-2.38.3-unsigned.zip
+
+# delete symlinks that would prevent Gatekeeper/spctl from passing otherwise
+echo "Deleting symlinks"
+rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/users/crossover/Downloads
+rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/users/crossover/Templates
+
+# sign the package using Codeweavers script
+echo "Signing package..."
+./sign_codeV4 $(pwd)/EasyCash\&Tax.app
