@@ -9,7 +9,7 @@ ein build environment, um das EasyCash&amp;Tax Codeweavers PortJump Paket für M
 
 ## Konfigurieren
 
-Das script braucht eine Konfigurationsdatei für die Apple-IDund dein "app-specific password", dasdu dir  auf https://appleid.apple.com erzeugt hast, z.B.:
+Das script braucht eine Konfigurationsdatei für die Apple-ID und dein "app-specific password", das du dir  auf https://appleid.apple.com erzeugt hast, z.B.:
 
     echo "appleid=meine@apple.id\naspw=abcd-efgh-ijkl-mnop" > myappleid.config
 
@@ -33,8 +33,8 @@ Das sollte im Projektverzeichnis ein Zip-Archiv namens 'EasyCT4Mac.zip' erzeugen
 
 ## Lizenzen
 
-GNU LGPL v2.1 für alle Wine-Komponenten im .zip
-GNU GPL 3.0 für alle im .zip enthaltenen EasyCash&Tax-Komponenten
+- GNU LGPL v2.1 für alle Wine-Komponenten im .zip
+- GNU GPL 3.0 für alle im .zip enthaltenen EasyCash&Tax-Komponenten
 
 ## Dank
 
