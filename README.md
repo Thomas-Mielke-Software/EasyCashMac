@@ -19,6 +19,10 @@ Optional sollte auch der Wert ascprov= angegeben werden, wenn man als Apple Deve
     aspw=qwer-tzui-asdf-ghjk
     ascprov=9Y63EZ54MD
 
+## Neue Versionen von EC&T
+
+Aktualisierte EC&T-Binärdateien könneins Verzeichnis WindowsBinaries getan werden und eine angepasste Version von Info.plist kann im Basisverzeichnis vorgehalten werden für die Versionsnummer und das Copyright-Datum.
+
 ## Bauen
 
 Starten des Build-Scripts:
@@ -26,3 +30,13 @@ Starten des Build-Scripts:
     ./build.sh
 
 Das sollte im Projektverzeichnis ein Zip-Archiv namens 'EasyCT4Mac.zip' erzeugen, das auf MacOS umstandslos zu öffnen ist.
+
+## Lizenzen
+
+GNU LGPL v2.1 für alle Wine-Komponenten im .zip
+GNU GPL 3.0 für alle im .zip enthaltenen EasyCash&Tax-Komponenten
+
+## Dank
+
+- an Codeweavers und macuser.de für Hilfe beim Debugge nder Notarisierung,
+- an alle Wine-Contributors, ohne die ein Mac-Port von EC&T nicht möglich gewesen wäre

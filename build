@@ -25,6 +25,10 @@ echo "Deleting symlinks"
 rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/users/crossover/Downloads
 rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/users/crossover/Templates
 
+# replace EC&T binaries and Info.plist with current versions
+cp WindowsBinaries/* EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/Program\ Files/EasyCash\&Tax
+cp Info.plist EasyCash\&Tax.app/Contents
+
 # sign the package using Codeweavers script
 echo "Signing package..."
 ./sign_codeV4 $(pwd)/EasyCash\&Tax.app
@@ -37,7 +41,7 @@ if [ -z "$ascprov" ]
 then
 	ascprovoption=
 else
-	ascprovoption="--asc-provider"
+ditto -c -k --keepParent EasyCash\&Tax.app EasyCT4Mac.zip	ascprovoption="--asc-provider"
 fi
 
 output=$(xcrun altool --notarize-app --primary-bundle-id de.easyct.easyct $ascprovoption $ascprov -u "$appleid" -p "$aspw" --file EasyCT.zip)
@@ -51,12 +55,14 @@ then
 fi
 
 echo "Notarization ticket: $ticket_id"
+echo "Waiting 10 seconds for Apple Notarizer to finish processing..."
+sleep 10
 xcrun altool --notarization-info "$ticket_id" -u "$appleid" -p "$aspw"
 
 echo "Stapeling..."
 output=$(xcrun stapler staple EasyCash\&Tax.app)
 echo $output
-stapling_worked=(echo "$output" | grep "The staple and validate action worked")
+stapling_worked=$(echo "$output" | grep "The staple and validate action worked")
 if [ -z "$stapling_worked" ]
 then
         echo "Error: stapling didn't work, it seems. Try to run 'xcrun stapler staple EasyCash\\\&Tax.app' and zip EasyCT4Mac.zip manually."
@@ -67,6 +73,7 @@ echo "Checking stapled EasyCash&Tax.app folder using spctl -a..."
 spctl --assess --type open --context context:primary-signature --verbose EasyCash\&Tax.app
 
 echo "Final packaging to EasyCT4Mac.zip..."
+rm EasyCT4Mac.zip
 ditto -c -k --keepParent EasyCash\&Tax.app EasyCT4Mac.zip
 
 # clean-up temporary zip, used for notarisation
