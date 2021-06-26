@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # read config
 echo "Reading myappleid.config"
 . ./myappleid.config
@@ -14,6 +12,9 @@ then
         exit 1
 fi
 echo "Notarisation will use apple id '$appleid'"
+
+# remove remnants of previous build
+rm EasyCT.zip
 
 # unzip archive to EasyCash&Tax.app folder
 echo "Unzipping original package..."
@@ -30,6 +31,18 @@ cp WindowsBinaries/* EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/eas
 cp Info.plist EasyCash\&Tax.app/Contents
 
 # add icon
+rm -f MyIcon.iconset
+mkdir MyIcon.iconset
+sips -z 16 16     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_16x16.png
+sips -z 32 32     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_16x16@2x.png
+sips -z 32 32     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_32x32.png
+sips -z 64 64     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_32x32@2x.png
+sips -z 128 128   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_128x128.png
+sips -z 256 256   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_128x128@2x.png
+sips -z 256 256   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_256x256.png
+sips -z 512 512   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_256x256@2x.png
+sips -z 512 512   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_512x512.png
+cp EasyCash_MacOS_Icon.png EasyCash.iconset/icon_512x512@2x.png
 iconutil -c icns $(pwd)/EasyCash.iconset
 cp EasyCash.icns EasyCash\&Tax.app/Contents/Resources
 rm EasyCash.icns
@@ -39,6 +52,7 @@ echo "Signing package..."
 ./sign_codeV4 $(pwd)/EasyCash\&Tax.app
 
 # archive signed package to a zip for notarisation
+echo "zipping package for notarisation..."
 ditto -c -k --keepParent EasyCash\&Tax.app EasyCT.zip
 
 # prepare option if team id was set
@@ -49,6 +63,7 @@ else
 	ascprovoption="--asc-provider"
 fi
 
+echo "notarising app..."
 output=$(xcrun altool --notarize-app --primary-bundle-id de.easyct.easyct $ascprovoption $ascprov -u "$appleid" -p "$aspw" --file EasyCT.zip)
 
 ticket_id=$(echo "$output" | grep RequestUUID | awk '{print $3}')
@@ -59,18 +74,25 @@ then
         exit 1
 fi
 
-echo "Notarization ticket: $ticket_id"
-echo "Waiting 60 seconds for Apple Notarizer to finish processing..."
-sleep 60
+echo "Notarisation ticket: $ticket_id"
+echo "Waiting 120 seconds for Apple Notarizer to finish processing..."
+sleep 120
 xcrun altool --notarization-info "$ticket_id" -u "$appleid" -p "$aspw"
+echo "xcrun altool --notarization-info \"$ticket_id\" -u \"$appleid\" -p \"$aspw\""
 
 echo "Stapeling..."
-output=$(xcrun stapler staple EasyCash\&Tax.app)
+output=$(xcrun stapler staple "EasyCash&Tax.app")
 echo $output
 stapling_worked=$(echo "$output" | grep "The staple and validate action worked")
 if [ -z "$stapling_worked" ]
 then
-        echo "Error: stapling didn't work, it seems. Try to run 'xcrun stapler staple EasyCash\\&Tax.app' and zip EasyCT4Mac.zip manually."
+	echo "test"
+        echo "Error: stapling didnt work, it seems. Try to run"
+	echo "   xcrun stapler staple EasyCash\\&Tax.app"
+	echo "Then check notarisation with"
+	echo "   spctl --assess --type open --context context:primary-signature --verbose EasyCash\\&Tax.app"
+	echo "Finally zip the package using"
+	echo "   ditto -c -k --keepParent EasyCash\\&Tax.app EasyCT4Mac.zip"
         exit 1
 fi
 
