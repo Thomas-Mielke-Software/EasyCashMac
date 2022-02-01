@@ -27,6 +27,8 @@ rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/users/
 rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/users/crossover/Templates
 
 # replace EC&T binaries and Info.plist with current versions
+rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/Program\ Files/EasyCash\&Tax/*.ecf
+rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/Program\ Files/EasyCash\&Tax/*.png
 cp WindowsBinaries/* EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/Program\ Files/EasyCash\&Tax
 cp Info.plist EasyCash\&Tax.app/Contents
 
