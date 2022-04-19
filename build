@@ -19,7 +19,7 @@ rm EasyCT.zip
 # unzip archive to EasyCash&Tax.app folder
 echo "Unzipping original package..."
 rm -rf EasyCash\&Tax.app
-unzip -q easyct-2.38.3-unsigned.zip
+unzip -q easyct-2.38.4-unsigned.zip
 
 # delete symlinks that would prevent Gatekeeper/spctl from passing otherwise
 echo "Deleting symlinks"

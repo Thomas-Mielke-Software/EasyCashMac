@@ -21,7 +21,8 @@ Optional sollte auch der Wert ascprov= angegeben werden, wenn man als Apple Deve
 
 ## Neue Versionen von EC&T
 
-Aktualisierte EC&T-Binärdateien könneins Verzeichnis WindowsBinaries getan werden und eine angepasste Version von Info.plist kann im Basisverzeichnis vorgehalten werden für die Versionsnummer und das Copyright-Datum.
+Aktualisierte EC&T-Binärdateien können ins Verzeichnis WindowsBinaries getan werden und eine angepasste Version von Info.plist kann im Basisverzeichnis 
+vorgehalten werden für die Versionsnummer und das Copyright-Datum.
 
 ## Bauen
 
