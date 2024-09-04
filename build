@@ -33,7 +33,7 @@ cp WindowsBinaries/* EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/eas
 cp Info.plist EasyCash\&Tax.app/Contents
 
 # add icon
-rm -f MyIcon.iconset
+rm -rf MyIcon.iconset
 mkdir MyIcon.iconset
 sips -z 16 16     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_16x16.png
 sips -z 32 32     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_16x16@2x.png
@@ -45,13 +45,13 @@ sips -z 256 256   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_256x256.pn
 sips -z 512 512   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_256x256@2x.png
 sips -z 512 512   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_512x512.png
 cp EasyCash_MacOS_Icon.png EasyCash.iconset/icon_512x512@2x.png
-iconutil -c icns $(pwd)/EasyCash.iconset
+iconutil -c icns "$(pwd)/EasyCash.iconset"
 cp EasyCash.icns EasyCash\&Tax.app/Contents/Resources
 rm EasyCash.icns
 
 # sign the package using Codeweavers script
 echo "Signing package..."
-./sign_codeV4 $(pwd)/EasyCash\&Tax.app
+./sign_codeV4 "$(pwd)/EasyCash&Tax.app"
 
 # archive signed package to a zip for notarisation
 echo "zipping package for notarisation..."
@@ -63,24 +63,30 @@ then
 	ascprovoption=
 else
 	ascprovoption="--asc-provider"
+	teamidoption="--team-id"
 fi
 
 echo "notarising app..."
-output=$(xcrun altool --notarize-app --primary-bundle-id de.easyct.easyct $ascprovoption $ascprov -u "$appleid" -p "$aspw" --file EasyCT.zip)
 
-ticket_id=$(echo "$output" | grep RequestUUID | awk '{print $3}')
+# ___ old notarization process using altool ___
+#output=$(xcrun notarytool --notarize-app --primary-bundle-id de.easyct.easyct $ascprovoption $ascprov -u "$appleid" -p "$aspw" --file EasyCT.zip)
+#
+#ticket_id=$(echo "$output" | grep RequestUUID | awk '{print $3}')
+#
+#if [ -z "$ticket_id" ]
+#then
+#	echo "Error: No ticket id was returned.\n\n$output"
+#        exit 1
+#fi
+#
+#echo "Notarisation ticket: $ticket_id"
+#echo "Waiting 120 seconds for Apple Notarizer to finish processing..."
+#sleep 120
+#xcrun notarytool --notarization-info "$ticket_id" -u "$appleid" -p "$aspw"
+#echo "xcrun notarytool --notarization-info \"$ticket_id\" -u \"$appleid\" -p \"$aspw\""
 
-if [ -z "$ticket_id" ]
-then
-	echo "Error: No ticket id was returned.\n\n$output"
-        exit 1
-fi
-
-echo "Notarisation ticket: $ticket_id"
-echo "Waiting 120 seconds for Apple Notarizer to finish processing..."
-sleep 120
-xcrun altool --notarization-info "$ticket_id" -u "$appleid" -p "$aspw"
-echo "xcrun altool --notarization-info \"$ticket_id\" -u \"$appleid\" -p \"$aspw\""
+# ___ new notarisation process using notarytool ___
+xcrun notarytool submit EasyCT.zip --apple-id "$appleid" $teamidoption $ascprov --password "$aspw" --wait
 
 echo "Stapeling..."
 output=$(xcrun stapler staple "EasyCash&Tax.app")
