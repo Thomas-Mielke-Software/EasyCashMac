@@ -19,7 +19,12 @@ rm EasyCT.zip
 # unzip archive to EasyCash&Tax.app folder
 echo "Unzipping original package..."
 rm -rf EasyCash\&Tax.app
-unzip -q easyct-2.38.4-unsigned.zip
+if [ -z "$1" ]
+then
+	packetzipfile="easyct-2.53.0-unsigned-v2.zip"
+        echo "No parameter submitted. Using $packetzipfile instead."
+fi
+unzip -q "$packetzipfile"
 
 # delete symlinks that would prevent Gatekeeper/spctl from passing otherwise
 echo "Deleting symlinks"
@@ -51,7 +56,8 @@ rm EasyCash.icns
 
 # sign the package using Codeweavers script
 echo "Signing package..."
-./sign_codeV4 "$(pwd)/EasyCash&Tax.app"
+# ./sign_codeV4 "$(pwd)/EasyCash&Tax.app"  # old signscript from Codeweavers
+./sign_portjump "$(pwd)/EasyCash&Tax.app"  # new signscript from PortJump Toolkit (unauthorised redistribution prohibited :-/ )
 
 # archive signed package to a zip for notarisation
 echo "zipping package for notarisation..."
