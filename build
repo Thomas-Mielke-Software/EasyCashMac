@@ -28,28 +28,39 @@ unzip -q "$packetzipfile"
 
 # delete symlinks that would prevent Gatekeeper/spctl from passing otherwise
 echo "Deleting symlinks"
-rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/users/crossover/Downloads
-rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/users/crossover/Templates
+rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/users/crossover/Downloads
+rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/users/crossover/Templates
 
 # replace EC&T binaries and Info.plist with current versions
-rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/Program\ Files/EasyCash\&Tax/*.ecf
-rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/Program\ Files/EasyCash\&Tax/*.png
-cp WindowsBinaries/* EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct/drive_c/Program\ Files/EasyCash\&Tax
+rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/Program\ Files\ \(x86\)/EasyCash\&Tax/*.ecf
+rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/Program\ Files\ \(x86\)/EasyCash\&Tax/*.png
+cp WindowsBinaries/* EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/Program\ Files\ \(x86\)/EasyCash\&Tax
+cp formula EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c
 cp Info.plist EasyCash\&Tax.app/Contents
 
 # add icon
 rm -rf MyIcon.iconset
 mkdir MyIcon.iconset
-sips -z 16 16     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_16x16.png
-sips -z 32 32     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_16x16@2x.png
-sips -z 32 32     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_32x32.png
-sips -z 64 64     EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_32x32@2x.png
-sips -z 128 128   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_128x128.png
-sips -z 256 256   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_128x128@2x.png
-sips -z 256 256   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_256x256.png
-sips -z 512 512   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_256x256@2x.png
-sips -z 512 512   EasyCash_MacOS_Icon.png --out EasyCash.iconset/icon_512x512.png
-cp EasyCash_MacOS_Icon.png EasyCash.iconset/icon_512x512@2x.png
+sips -z 16 16     EasyCash_MacOS_Icon.png --out icon_16x16.png
+mv icon_16x16.png EasyCash.iconset
+sips -z 32 32     EasyCash_MacOS_Icon.png --out icon_16x16@2x.png
+mv icon_16x16@2x.png EasyCash.iconset
+sips -z 32 32     EasyCash_MacOS_Icon.png --out icon_32x32.png
+mv icon_32x32.png EasyCash.iconset
+sips -z 64 64     EasyCash_MacOS_Icon.png --out icon_32x32@2x.png
+mv icon_32x32@2x.png EasyCash.iconset
+sips -z 128 128   EasyCash_MacOS_Icon.png --out icon_128x128.png
+mv icon_128x128.png EasyCash.iconset
+sips -z 256 256   EasyCash_MacOS_Icon.png --out icon_128x128@2x.png
+mv icon_128x128@2x.png EasyCash.iconset
+sips -z 256 256   EasyCash_MacOS_Icon.png --out icon_256x256.png
+mv icon_256x256.png EasyCash.iconset
+sips -z 512 512   EasyCash_MacOS_Icon.png --out icon_256x256@2x.png
+mv icon_256x256@2x.png EasyCash.iconset
+sips -z 512 512   EasyCash_MacOS_Icon.png --out icon_512x512.png
+mv icon_512x5126.png EasyCash.iconset
+cp EasyCash_MacOS_Icon.png EasyCash.iconset
+mv EasyCash.iconset/EasyCash_MacOS_Icon.png EasyCash.iconset/icon_512x512@2x.png
 iconutil -c icns "$(pwd)/EasyCash.iconset"
 cp EasyCash.icns EasyCash\&Tax.app/Contents/Resources
 rm EasyCash.icns
