@@ -22,62 +22,47 @@ rm -rf EasyCash\&Tax.app
 if [ -z "$1" ]
 then
 	packetzipfile="easyct-2.53.0-unsigned-v3.zip"
-        echo "No parameter submitted. Using $packetzipfile instead."
+    echo "No parameter submitted. Using $packetzipfile instead."
 fi
 unzip -q "$packetzipfile"
 
 # delete symlinks that would prevent Gatekeeper/spctl from passing otherwise
-#echo "Deleting symlinks"
-#rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/users/crossover/Downloads
-#rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/users/crossover/Templates
-#(seems to be no longer necessary to delete them)
+echo "Deleting dot-files and removing quarantine attributes"
+find "EasyCash&Tax.app" -name '.*' -not -name '.update-timestamp' -not -name '.version' -delete
+xattr -r -d com.apple.quarantine "EasyCash&Tax.app"
 
-# replace EC&T binaries and Info.plist with current versions
-rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/Program\ Files\ \(x86\)/EasyCash\&Tax/*.ecf
-rm EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/Program\ Files\ \(x86\)/EasyCash\&Tax/*.png
-cp WindowsBinaries/* EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c/Program\ Files\ \(x86\)/EasyCash\&Tax
-cp formula EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64/drive_c
-cp Info.plist EasyCash\&Tax.app/Contents
+export CX_ROOT="`pwd`/EasyCash&Tax.app/Contents/SharedSupport/easyct"
+export WINEPREFIX="$CX_ROOT/support/easyct64"
 
-# add icon
-#rm -rf MyIcon.iconset
-#mkdir MyIcon.iconset
-#sips -z 16 16     EasyCash_MacOS_Icon.png --out icon_16x16.png
-#mv icon_16x16.png EasyCash.iconset
-#sips -z 32 32     EasyCash_MacOS_Icon.png --out icon_16x16@2x.png
-#mv icon_16x16@2x.png EasyCash.iconset
-#sips -z 32 32     EasyCash_MacOS_Icon.png --out icon_32x32.png
-#mv icon_32x32.png EasyCash.iconset
-#sips -z 64 64     EasyCash_MacOS_Icon.png --out icon_32x32@2x.png
-#mv icon_32x32@2x.png EasyCash.iconset
-#sips -z 128 128   EasyCash_MacOS_Icon.png --out icon_128x128.png
-#mv icon_128x128.png EasyCash.iconset
-#sips -z 256 256   EasyCash_MacOS_Icon.png --out icon_128x128@2x.png
-#mv icon_128x128@2x.png EasyCash.iconset
-#sips -z 256 256   EasyCash_MacOS_Icon.png --out icon_256x256.png
-#mv icon_256x256.png EasyCash.iconset
-#sips -z 512 512   EasyCash_MacOS_Icon.png --out icon_256x256@2x.png
-#mv icon_256x256@2x.png EasyCash.iconset
-#sips -z 512 512   EasyCash_MacOS_Icon.png --out icon_512x512.png
-#mv icon_512x5126.png EasyCash.iconset
-#cp EasyCash_MacOS_Icon.png EasyCash.iconset
-#mv EasyCash.iconset/EasyCash_MacOS_Icon.png EasyCash.iconset/icon_512x512@2x.png
-#iconutil -c icns "$(pwd)/EasyCash.iconset"
-#cp EasyCash.icns EasyCash\&Tax.app/Contents/Resources
-#rm EasyCash.icns
-#now in CrossOverOEM.icns
+# replace EC&T binaries with current versions
+rm "$WINEPREFIX/drive_c/Program Files (x86)/EasyCash&Tax/*.ecf"
+rm "$WINEPREFIX/drive_c/Program Files (x86)/EasyCash&Tax/*.png"
+cp WindowsBinaries/* "$WINEPREFIX/drive_c/Program Files (x86)/EasyCash&Tax/"
+cp formula "$WINEPREFIX/drive_c"
+
+# Update version number in Info.plist file
+INFOPLIST="`pwd`/EasyCash&Tax.app/Contents/Info.plist"
+VERSION_NUM=2.43.1
+
+defaults write "$INFOPLIST" CFBundleVersion -string $VERSION_NUM
+defaults write "$INFOPLIST" CFBundleShortVersionString -string $VERSION_NUM
+defaults write "$INFOPLIST" CFBundleGetInfoString -string "$VERSION_NUM, Copyright © 2024 Thomas Mielke"
+plutil -convert xml1 "$INFOPLIST"
 
 # refresh package (essentially from portjump refresh script) -- updates files database. Explanation: 
 # In the easyct64 folder is a file named 'files'. This records all the directories and files included in the bottle, and the timestamps of the files.
 # This is then used to compare against the local version of the bottle on the end user's machine, to identify if there are updates that need to be
 # applied (copying or linking new files, removing old files, etc). The command I provided basically just updates the 'files' file. It can be simplified
 # to a single line:
-WINEPREFIX="EasyCash\&Tax.app/Contents/SharedSupport/easyct/support/easyct64" CX_ROOT="EasyCash\&Tax.app/Contents/SharedSupport/easyct" "$root/bin/wineprefixcreate" --snapshot
-# You need to run this after any changes you make to any of the files under "drive_c". It will update the 'files' file with any changes you've made.
+
+# Ensure permissions are correct on files
+find "$WINEPREFIX" -type f -print0 | xargs -0 chmod a+r
+find "$WINEPREFIX" -type d -print0 | xargs -0 chmod a+rx
+
+"$CX_ROOT/bin/wineprefixcreate" --snapshot
 
 # sign the package using Codeweavers script
 echo "Signing package..."
-# ./sign_codeV4 "$(pwd)/EasyCash&Tax.app"  # old signscript from Codeweavers
 ./sign_portjump "$(pwd)/EasyCash&Tax.app"  # new signscript from PortJump Toolkit (unauthorised redistribution prohibited :-/ )
 
 # archive signed package to a zip for notarisation
