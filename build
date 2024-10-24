@@ -21,7 +21,7 @@ echo "Unzipping original package..."
 rm -rf EasyCash\&Tax.app
 if [ -z "$1" ]
 then
-	packetzipfile="easyct-2.53.0-unsigned-v3.zip"
+	packetzipfile="easyct-2.53.0-unsigned-v4.zip"
     echo "No parameter submitted. Using $packetzipfile instead."
 fi
 unzip -q "$packetzipfile"
@@ -45,7 +45,7 @@ cp formula/de/* "$WINEPREFIX/drive_c/de"
 
 # Update version number in Info.plist file
 INFOPLIST="`pwd`/EasyCash&Tax.app/Contents/Info.plist"
-VERSION_NUM=2.54.1
+VERSION_NUM=3.0.0
 
 defaults write "$INFOPLIST" CFBundleVersion -string $VERSION_NUM
 defaults write "$INFOPLIST" CFBundleShortVersionString -string $VERSION_NUM
