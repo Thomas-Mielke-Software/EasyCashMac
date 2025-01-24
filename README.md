@@ -2,10 +2,12 @@
 ein build environment, um das EasyCash&amp;Tax Codeweavers PortJump Paket für MacOS zu pflegen
 
 ## Voraussetzungen
+
 - git large file storage extension
   - geh auf https://git-lfs.github.com und installiere die Extension entsprechend deiner Vorlieben (z.B. 'brew install git-lfs' auf MacOS)
   - ``git lfs install``
 - eine passende Developer ID und MacOS distribution provisioning für die AppID- auf https://developer.apple.com .
+- das PortJump SDK
 
 ## Konfigurieren
 
@@ -21,8 +23,7 @@ Optional sollte auch der Wert ascprov= angegeben werden, wenn man als Apple Deve
 
 ## Neue Versionen von EC&T
 
-Aktualisierte EC&T-Binärdateien können ins Verzeichnis WindowsBinaries getan werden und eine angepasste Version von Info.plist kann im Basisverzeichnis 
-vorgehalten werden für die Versionsnummer und das Copyright-Datum.
+Aktualisierte EC&T-Binärdateien können ins Verzeichnis *WindowsBinaries* getan werden. Formulare kommen je nach Land in das *de*- oder *at*-Unterverzeichnis.
 
 ## Bauen
 
@@ -39,5 +40,5 @@ Das sollte im Projektverzeichnis ein Zip-Archiv namens 'EasyCT4Mac.zip' erzeugen
 
 ## Dank
 
-- an Codeweavers und macuser.de für Hilfe beim Debugge nder Notarisierung,
-- an alle Wine-Contributors, ohne die ein Mac-Port von EC&T nicht möglich gewesen wäre
+- an Codeweavers und macuser.de für Hilfe beim Debuggen der Notarisierung,
+- an alle anderen Wine-Contributors, ohne die ein Mac-Port von EC&T nicht möglich gewesen wäre

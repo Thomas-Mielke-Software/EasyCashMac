@@ -21,7 +21,7 @@ echo "Unzipping original package..."
 rm -rf EasyCash\&Tax.app
 if [ -z "$1" ]
 then
-	packetzipfile="easyct-2.53.0-unsigned-v4.zip"
+	packetzipfile="easyct-2.53.0-unsigned-v5.zip"
     echo "No parameter submitted. Using $packetzipfile instead."
 fi
 unzip -q "$packetzipfile"
