@@ -23,7 +23,7 @@ Optional sollte auch der Wert ascprov= angegeben werden, wenn man als Apple Deve
 
 ## Neue Versionen von EC&T
 
-Aktualisierte EC&T-Binärdateien können ins Verzeichnis *WindowsBinaries* getan werden. Formulare kommen je nach Land in das *de*- oder *at*-Unterverzeichnis.
+Aktualisierte EC&T-Binärdateien können ins Verzeichnis *WindowsBinaries* getan werden. Formulare kommen je nach Land in das *de*- oder *at*-Unterverzeichnis des Ordners formula.
 
 ## Bauen
 

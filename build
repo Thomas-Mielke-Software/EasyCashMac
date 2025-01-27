@@ -36,20 +36,22 @@ export WINEPREFIX="$CX_ROOT/support/easyct64"
 
 # replace EC&T binaries with current version
 echo "replacing EC&T binaries with current version"
-rm "$WINEPREFIX/drive_c/Program Files (x86)/EasyCash&Tax/*.ecf"
-rm "$WINEPREFIX/drive_c/Program Files (x86)/EasyCash&Tax/*.png"
+rm "$WINEPREFIX/drive_c/Program Files (x86)/EasyCash&Tax/"*".ecf"
+rm "$WINEPREFIX/drive_c/Program Files (x86)/EasyCash&Tax/"*".png"
 cp WindowsBinaries/* "$WINEPREFIX/drive_c/Program Files (x86)/EasyCash&Tax/"
 echo "replacing Austrian and German tax forms in package"
-cp formula/at/* "$WINEPREFIX/drive_c/at"
-cp formula/de/* "$WINEPREFIX/drive_c/de"
+rm "$WINEPREFIX/drive_c/formula/at/"*
+rm "$WINEPREFIX/drive_c/formula/de/"*
+cp formula/at/* "$WINEPREFIX/drive_c/formula/at"
+cp formula/de/* "$WINEPREFIX/drive_c/formula/de"
 
 # Update version number in Info.plist file
 INFOPLIST="`pwd`/EasyCash&Tax.app/Contents/Info.plist"
-VERSION_NUM=3.0.0
+VERSION_NUM=3.3.0
 
 defaults write "$INFOPLIST" CFBundleVersion -string $VERSION_NUM
 defaults write "$INFOPLIST" CFBundleShortVersionString -string $VERSION_NUM
-defaults write "$INFOPLIST" CFBundleGetInfoString -string "$VERSION_NUM, Copyright © 2024 Thomas Mielke"
+defaults write "$INFOPLIST" CFBundleGetInfoString -string "$VERSION_NUM, Copyright © 2025 Thomas Mielke"
 plutil -convert xml1 "$INFOPLIST"
 
 # refresh package (essentially from portjump refresh script) -- updates files database. Explanation: 
